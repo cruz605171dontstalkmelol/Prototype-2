@@ -1,0 +1,56 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerController : MonoBehaviour {
+
+    [Header("Main References")]
+    private Rigidbody _myRigidbody;
+    private Animator _myAnimator;
+
+    [Header("Walking/Running")]
+    private float _speed = 8;
+    private Vector2 _movement;
+    private Vector3 _updateMovementToVector3;
+    private bool isWalking;
+
+    private void Awake() {
+        _myRigidbody = GetComponent<Rigidbody>();
+        _myAnimator = GetComponent<Animator>();
+    }
+
+    private void Update() {
+        RotateForward();
+        UpdateAnimator();
+    }
+
+    private void FixedUpdate() {
+        MoveAround();
+    }
+
+    private void RotateForward() {
+        if (_movement.sqrMagnitude > 0.1f) {
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_updateMovementToVector3), _speed);
+        }
+    }
+
+    private void UpdateAnimator() {
+        if (_movement.x != 0 || _movement.y != 0) {
+            _myAnimator.SetFloat("Speed_f", _speed);
+            _myAnimator.SetBool("Static_b", false);
+        } else {
+            _myAnimator.SetFloat("Speed_f", 0);
+            _myAnimator.SetBool("Static_b", true);
+        }
+    }
+
+    private void MoveAround() { 
+        _myRigidbody.MovePosition(_myRigidbody.position + _updateMovementToVector3 * _speed * Time.fixedDeltaTime);
+    }
+
+    //inputs
+    public void OnMove(InputAction.CallbackContext context) {
+        _movement = context.ReadValue<Vector2>();
+        _updateMovementToVector3 = new Vector3(_movement.x, 0f, _movement.y);
+    }
+
+}
