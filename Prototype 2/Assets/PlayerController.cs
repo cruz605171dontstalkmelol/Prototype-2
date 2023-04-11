@@ -9,11 +9,18 @@ public class PlayerController : MonoBehaviour {
     private Rigidbody _myRigidbody;
     private Animator _myAnimator;
 
+    [Header("Type specific")]
+    public bool isHuman;
+
     [Header("Walking/Running")]
     private float _speed = 8;
     private Vector2 _movement;
     private Vector3 _updateMovementToVector3;
     private bool isWalking;
+
+    [Header("Abilities")]
+    public GameObject thrownObject;
+    public Transform spawnObjectReference;
 
     private void Awake() {
         if (_myView.IsMine) {
@@ -60,6 +67,17 @@ public class PlayerController : MonoBehaviour {
         if (_myView.IsMine) {
             _movement = context.ReadValue<Vector2>();
             _updateMovementToVector3 = new Vector3(_movement.x, 0f, _movement.y);
+        }
+    }
+
+    public void OnThrow(InputAction.CallbackContext context) {
+        if (_myView.IsMine) {
+            if (!isHuman) { return; }
+            //throw object
+            _myAnimator.Play("GrenadeThrow");
+            GameObject instFood = PhotonNetwork.Instantiate(thrownObject.name, spawnObjectReference.position, Quaternion.identity);
+            spawnObjectReference.GetComponent<Animator>().Play("SpawnFood_Throw");
+            instFood.transform.parent = spawnObjectReference.transform;
         }
     }
 

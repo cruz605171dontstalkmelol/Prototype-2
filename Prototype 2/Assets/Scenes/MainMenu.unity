@@ -420,6 +420,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   username: 
+  spotNumber: 0
+  teamID: 0
+  hasReadiedUp: 0
 --- !u!1 &1024715495
 GameObject:
   m_ObjectHideFlags: 0
