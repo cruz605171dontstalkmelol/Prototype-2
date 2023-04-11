@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Photon.Pun;
 
 public class PlayerController : MonoBehaviour {
 
     [Header("Main References")]
+    public PhotonView _myView;
     private Rigidbody _myRigidbody;
     private Animator _myAnimator;
 
@@ -14,17 +16,23 @@ public class PlayerController : MonoBehaviour {
     private bool isWalking;
 
     private void Awake() {
-        _myRigidbody = GetComponent<Rigidbody>();
-        _myAnimator = GetComponent<Animator>();
+        if (_myView.IsMine) {
+            _myRigidbody = GetComponent<Rigidbody>();
+            _myAnimator = GetComponent<Animator>();
+        }
     }
 
     private void Update() {
-        RotateForward();
-        UpdateAnimator();
+        if (_myView.IsMine) {
+            RotateForward();
+            UpdateAnimator();
+        }
     }
 
     private void FixedUpdate() {
-        MoveAround();
+        if (_myView.IsMine) {
+            MoveAround();
+        }
     }
 
     private void RotateForward() {
@@ -49,8 +57,10 @@ public class PlayerController : MonoBehaviour {
 
     //inputs
     public void OnMove(InputAction.CallbackContext context) {
-        _movement = context.ReadValue<Vector2>();
-        _updateMovementToVector3 = new Vector3(_movement.x, 0f, _movement.y);
+        if (_myView.IsMine) {
+            _movement = context.ReadValue<Vector2>();
+            _updateMovementToVector3 = new Vector3(_movement.x, 0f, _movement.y);
+        }
     }
 
 }
