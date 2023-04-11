@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour {
     private Vector2 _movement;
     private Vector3 _updateMovementToVector3;
     private bool isWalking;
+    private bool allowedToWalk = true;
 
     [Header("Abilities")]
     public GameObject thrownObject;
@@ -31,6 +32,7 @@ public class PlayerController : MonoBehaviour {
 
     private void Update() {
         if (_myView.IsMine) {
+            if (!allowedToWalk) { return; }
             RotateForward();
             UpdateAnimator();
         }
@@ -38,6 +40,7 @@ public class PlayerController : MonoBehaviour {
 
     private void FixedUpdate() {
         if (_myView.IsMine) {
+            if (!allowedToWalk) { return; }
             MoveAround();
         }
     }
@@ -71,14 +74,26 @@ public class PlayerController : MonoBehaviour {
     }
 
     public void OnThrow(InputAction.CallbackContext context) {
-        if (_myView.IsMine) {
-            if (!isHuman) { return; }
-            //throw object
-            _myAnimator.Play("GrenadeThrow");
-            GameObject instFood = PhotonNetwork.Instantiate(thrownObject.name, spawnObjectReference.position, Quaternion.identity);
-            spawnObjectReference.GetComponent<Animator>().Play("SpawnFood_Throw");
-            instFood.transform.parent = spawnObjectReference.transform;
+        if (context.started) {
+            if (_myView.IsMine) {
+                if (!isHuman) { return; }
+                Debug.Log("Should be happening once");
+
+                //throw object
+                _myAnimator.Play("GrenadeThrow");
+                GameObject instFood = PhotonNetwork.Instantiate(thrownObject.name, spawnObjectReference.position, spawnObjectReference.rotation);
+                instFood.GetComponent<ThrowObject>().owner = this.transform;
+                spawnObjectReference.GetComponent<Animator>().Play("SpawnFood_Throw");
+                instFood.transform.parent = spawnObjectReference.transform;
+            }
         }
+    }
+
+    private void OnCollisionEnter(Collision collision) {
+        if (isHuman) { return; }
+        if (collision.gameObject.tag != "food") { return; }
+
+        _myRigidbody.AddForce(Vector3.up * 1500);
     }
 
 }

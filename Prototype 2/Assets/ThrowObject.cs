@@ -8,11 +8,17 @@ public class ThrowObject : MonoBehaviour {
     public Material[] possibleMaterials;
 
     private Rigidbody _myRigidbody;
+    private SphereCollider _myCollider;
+
+    public Transform owner;
+
+    [SerializeField] private int forcePower;
 
     private void Start() {
         _myRendererFilter = GetComponent<MeshFilter>();
         _myRenderer = GetComponent<MeshRenderer>();
         _myRigidbody = GetComponent<Rigidbody>();
+        _myCollider = GetComponent<SphereCollider>();
 
         //get random value
         int rand = Random.Range(0, possibleMeshes.Length);
@@ -21,13 +27,19 @@ public class ThrowObject : MonoBehaviour {
         _myRenderer.material = possibleMaterials[rand];
 
         //throw
-        Invoke("Throw", .235f);
+        Invoke("Throw", .75f);
+        //Invoke("Throw", .235f);
     }
 
     private void Throw() {
         _myRigidbody.useGravity = true;
         transform.parent = null;
-        _myRigidbody.AddForce(Vector3.forward * 2500);
+        _myRigidbody.AddForce(owner.forward * forcePower);
+        Invoke("ToggleCollision", .3f);
+    }
+
+    private void ToggleCollision() {
+        _myCollider.enabled = true;
     }
 
 }

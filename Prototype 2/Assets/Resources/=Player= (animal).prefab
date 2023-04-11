@@ -886,6 +886,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 511972c4-7f47-480c-b0b3-04e586afbbf2
     m_ActionName: Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 3f162cdb-1176-4ba2-af98-3cc9eb100afe
+    m_ActionName: Player/Throw[/Keyboard/space]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -904,6 +908,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _myView: {fileID: 6565280639062427923}
+  isHuman: 0
+  thrownObject: {fileID: 6811358700365017150, guid: 38a6bdebfed77e24097965b69f348985, type: 3}
+  spawnObjectReference: {fileID: 6811358700365017145, guid: 38a6bdebfed77e24097965b69f348985, type: 3}
 --- !u!114 &7415627918558849132
 MonoBehaviour:
   m_ObjectHideFlags: 0
