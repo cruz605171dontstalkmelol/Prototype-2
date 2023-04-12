@@ -13,11 +13,20 @@ public class ServerGameManager : MonoBehaviour {
     public int currentSpotInList;
     private int totalReady;
 
+    public GameObject[] playerReferences = new GameObject[15];
+
     public GameState gameState;
     public enum GameState {
         lobby,
         playing,
         finished
+    }
+
+    [PunRPC]
+    public void SendNewPlayerToList(int viewID, int mySpot) {
+        //playerReferences.Add(PhotonView.Find(viewID).gameObject);
+        //playerReferences.Insert(MainGameManager.instance.spotNumber, PhotonView.Find(viewID).gameObject);
+        playerReferences[mySpot] = PhotonView.Find(viewID).gameObject;
     }
 
     [PunRPC]
@@ -29,6 +38,11 @@ public class ServerGameManager : MonoBehaviour {
             case 1:
                 if (gameState != GameState.playing) {
                     gameState = GameState.playing;
+                    GameObject tempObj = new GameObject();
+
+                    Debug.Log("Happens once");
+
+
                     ClientGameManager.instance.StartedPlaying();
                 }
                 break;
@@ -65,6 +79,36 @@ public class ServerGameManager : MonoBehaviour {
         if (totalReady == playerNames.Count) {
             ClientGameManager.instance.StartGame();
         }
+    }
+
+    [PunRPC]
+    public void PlayAnimation(int spotNumber, string animName, int type) {
+        switch (type) {
+            default:
+                playerReferences[spotNumber].GetComponentInChildren<PlayerController>().myAnimator.Play(animName);
+                break;
+            case 1:
+                //special for human player to find spawned food object
+                playerReferences[spotNumber].GetComponentInChildren<PlayerController>().spawnObjectReference.GetComponent<Animator>().Play(animName);
+                break;
+        }
+    }
+
+    [PunRPC]
+    public void ChangeName(int viewID, string newName) {
+        PhotonView.Find(viewID).gameObject.name = newName;
+    }
+
+    [PunRPC]
+    public void SetOwnerToFood(int viewID, int playerSpot) {
+        PhotonView.Find(viewID).GetComponent<ThrowObject>().owner = playerReferences[playerSpot].GetComponentInChildren<PlayerController>().transform;
+        PhotonView.Find(viewID).GetComponent<ThrowObject>().transform.parent = playerReferences[playerSpot].GetComponentInChildren<PlayerController>().spawnObjectReference.transform;
+
+    }
+
+    [PunRPC]
+    public void SetRandomInt (int value) {
+        MainGameManager.instance.theRandomNumber = value;
     }
 
 }

@@ -537,7 +537,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 273acf573e17d9f4bb82f73c851f9951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _myView: {fileID: -1992423239563021060}
+  myView: {fileID: -1992423239563021060}
+  myAnimator: {fileID: 4536401591075413259}
   isHuman: 1
   thrownObject: {fileID: 6811358700365017150, guid: 38a6bdebfed77e24097965b69f348985, type: 3}
   spawnObjectReference: {fileID: 5011045889463191803}

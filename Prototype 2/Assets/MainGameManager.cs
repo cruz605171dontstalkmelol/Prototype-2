@@ -10,6 +10,7 @@ public class MainGameManager : MonoBehaviour {
     public int spotNumber;
     public int teamID;
     public bool hasReadiedUp;
+    public int theRandomNumber;
 
     public void ResetVariables () {
         username = "";

@@ -1,13 +1,15 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using Photon.Pun;
 
 public class PlayerController : MonoBehaviour {
 
     [Header("Main References")]
-    public PhotonView _myView;
+    public PhotonView myView;
     private Rigidbody _myRigidbody;
-    private Animator _myAnimator;
+    public Animator myAnimator;
 
     [Header("Type specific")]
     public bool isHuman;
@@ -24,14 +26,20 @@ public class PlayerController : MonoBehaviour {
     public Transform spawnObjectReference;
 
     private void Awake() {
-        if (_myView.IsMine) {
+        if (myView.IsMine) {
             _myRigidbody = GetComponent<Rigidbody>();
-            _myAnimator = GetComponent<Animator>();
+            myAnimator = GetComponent<Animator>();
         }
+
+        Invoke("AddNewPlayer", .1f);
+    }
+    private void AddNewPlayer () {
+        if (!myView.IsMine) { return; }
+        ServerGameManager.instance.serverView.RPC("SendNewPlayerToList", RpcTarget.AllBuffered, myView.ViewID, MainGameManager.instance.spotNumber);
     }
 
     private void Update() {
-        if (_myView.IsMine) {
+        if (myView.IsMine) {
             if (!allowedToWalk) { return; }
             RotateForward();
             UpdateAnimator();
@@ -39,7 +47,7 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        if (_myView.IsMine) {
+        if (myView.IsMine) {
             if (!allowedToWalk) { return; }
             MoveAround();
         }
@@ -53,11 +61,11 @@ public class PlayerController : MonoBehaviour {
 
     private void UpdateAnimator() {
         if (_movement.x != 0 || _movement.y != 0) {
-            _myAnimator.SetFloat("Speed_f", _speed);
-            _myAnimator.SetBool("Static_b", false);
+            myAnimator.SetFloat("Speed_f", _speed);
+            myAnimator.SetBool("Static_b", false);
         } else {
-            _myAnimator.SetFloat("Speed_f", 0);
-            _myAnimator.SetBool("Static_b", true);
+            myAnimator.SetFloat("Speed_f", 0);
+            myAnimator.SetBool("Static_b", true);
         }
     }
 
@@ -67,7 +75,7 @@ public class PlayerController : MonoBehaviour {
 
     //inputs
     public void OnMove(InputAction.CallbackContext context) {
-        if (_myView.IsMine) {
+        if (myView.IsMine) {
             _movement = context.ReadValue<Vector2>();
             _updateMovementToVector3 = new Vector3(_movement.x, 0f, _movement.y);
         }
@@ -75,16 +83,17 @@ public class PlayerController : MonoBehaviour {
 
     public void OnThrow(InputAction.CallbackContext context) {
         if (context.started) {
-            if (_myView.IsMine) {
-                if (!isHuman) { return; }
-                Debug.Log("Should be happening once");
-
-                //throw object
-                _myAnimator.Play("GrenadeThrow");
-                GameObject instFood = PhotonNetwork.Instantiate(thrownObject.name, spawnObjectReference.position, spawnObjectReference.rotation);
-                instFood.GetComponent<ThrowObject>().owner = this.transform;
-                spawnObjectReference.GetComponent<Animator>().Play("SpawnFood_Throw");
-                instFood.transform.parent = spawnObjectReference.transform;
+            if (myView.IsMine) {
+                if (isHuman) {
+                    //throw object
+                    ServerGameManager.instance.serverView.RPC("PlayAnimation", RpcTarget.All, MainGameManager.instance.spotNumber, "GrenadeThrow", 0);
+                    GameObject instFood = PhotonNetwork.Instantiate(thrownObject.name, spawnObjectReference.position, spawnObjectReference.rotation);
+                    ServerGameManager.instance.serverView.RPC("SetOwnerToFood", RpcTarget.All, instFood.GetComponent<PhotonView>().ViewID, MainGameManager.instance.spotNumber);
+                    ServerGameManager.instance.serverView.RPC("PlayAnimation", RpcTarget.All, MainGameManager.instance.spotNumber, "SpawnFood_Throw", 1);
+                }
+                else if (!isHuman) {
+                    _myRigidbody.AddForce(Vector3.forward * 5500);
+                }
             }
         }
     }
@@ -93,7 +102,7 @@ public class PlayerController : MonoBehaviour {
         if (isHuman) { return; }
         if (collision.gameObject.tag != "food") { return; }
 
-        _myRigidbody.AddForce(Vector3.up * 1500);
+        _myRigidbody.AddForce(Vector3.up * 5500);
     }
 
 }

@@ -20,6 +20,7 @@ public class ClientGameManager : MonoBehaviour {
     public GameObject humanPrefab;
     public GameObject animalPrefab;
     public Collider spawningBounds;
+    //public GameObject[] playerReferences;
 
     //rpc buffer delay
     private void Start() {
