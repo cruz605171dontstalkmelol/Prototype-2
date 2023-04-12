@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour {
     [Header("Abilities")]
     public GameObject thrownObject;
     public Transform spawnObjectReference;
+    private bool readyToDash;
 
     private void Awake() {
         if (myView.IsMine) {
@@ -50,7 +51,15 @@ public class PlayerController : MonoBehaviour {
         if (myView.IsMine) {
             if (!allowedToWalk) { return; }
             MoveAround();
+            if (readyToDash) {
+                Dash();
+            }
         }
+    }
+
+    private void Dash() {
+        readyToDash = false;
+        _myRigidbody.AddRelativeForce(Vector3.forward * 15500);
     }
 
     private void RotateForward() {
@@ -92,17 +101,22 @@ public class PlayerController : MonoBehaviour {
                     ServerGameManager.instance.serverView.RPC("PlayAnimation", RpcTarget.All, MainGameManager.instance.spotNumber, "SpawnFood_Throw", 1);
                 }
                 else if (!isHuman) {
-                    _myRigidbody.AddForce(Vector3.forward * 5500);
+                    readyToDash = true;
                 }
             }
         }
     }
 
     private void OnCollisionEnter(Collision collision) {
-        if (isHuman) { return; }
-        if (collision.gameObject.tag != "food") { return; }
-
-        _myRigidbody.AddForce(Vector3.up * 5500);
+        if (isHuman) {
+            if (collision.gameObject.tag == "animal") {
+                _myRigidbody.AddForce(Vector3.up * 100);
+            }
+        }
+        else if (!isHuman) {
+            if (collision.gameObject.tag != "food") { return; }
+            _myRigidbody.AddForce(Vector3.up * 100);
+        }
     }
 
 }
