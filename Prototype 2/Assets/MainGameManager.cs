@@ -10,13 +10,23 @@ public class MainGameManager : MonoBehaviour {
     public int spotNumber;
     public int teamID;
     public bool hasReadiedUp;
+
     public int theRandomNumber;
+    public Vector3 theRandomPosition;
+
+    public int speedUpgrade;
+    public int reloadUpgrade;
+    public int damageUpgrade;
 
     public void ResetVariables () {
         username = "";
         spotNumber = 0;
         teamID = 0;
         hasReadiedUp = false;
+
+        speedUpgrade = 0;
+        reloadUpgrade = 0;
+        damageUpgrade = 0;
     }
 
 }

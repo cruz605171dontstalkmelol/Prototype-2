@@ -22,6 +22,11 @@ public class ClientGameManager : MonoBehaviour {
     public Collider spawningBounds;
     //public GameObject[] playerReferences;
 
+    [Header("Mode:Playing")]
+    private float spawnFoodTimer = 1;
+    public GameObject foodSpawn;
+    public GameObject uiScoreHolder;
+
     //rpc buffer delay
     private void Start() {
         HostOrPlayer();
@@ -92,7 +97,21 @@ public class ClientGameManager : MonoBehaviour {
     //start the game
     public void StartGame() {
         lobbyHolder.SetActive(false);
+        uiScoreHolder.SetActive(true);
         ServerGameManager.instance.serverView.RPC("ChangeGameState", RpcTarget.AllBuffered, 1);
+        Invoke("SpawnFood", spawnFoodTimer);
+    }
+
+    //spawn food
+    public void SpawnFood () {
+        if (PhotonNetwork.IsMasterClient) {
+            Bounds bounds = spawningBounds.bounds;
+            float x = Random.Range(bounds.min.x, bounds.max.x);
+            float y = 1;
+            float z = Random.Range(bounds.min.z, bounds.max.z);
+            ServerGameManager.instance.serverView.RPC("GetRandomPosition", RpcTarget.All, x, y, z);
+            Invoke("SpawnFood", spawnFoodTimer);
+        }
     }
 
     public void StartedPlaying() {
@@ -109,5 +128,22 @@ public class ClientGameManager : MonoBehaviour {
             1,
             Random.Range(bounds.min.z, bounds.max.z)
        );
+    }
+
+    public void UpgradeType(int upgradeType) {
+        switch (upgradeType) {
+            default:
+                return;
+            case 0:
+                MainGameManager.instance.speedUpgrade += 1;
+                break;
+            case 1:
+                MainGameManager.instance.reloadUpgrade += 1;
+                break;
+            case 2:
+                MainGameManager.instance.damageUpgrade += 1;
+                break;
+
+        }
     }
 }

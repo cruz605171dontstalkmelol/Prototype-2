@@ -14,6 +14,7 @@ public class ServerGameManager : MonoBehaviour {
     private int totalReady;
 
     public GameObject[] playerReferences = new GameObject[15];
+    public int[] playerDiamondCounts = new int[15];
 
     public GameState gameState;
     public enum GameState {
@@ -109,6 +110,30 @@ public class ServerGameManager : MonoBehaviour {
     [PunRPC]
     public void SetRandomInt (int value) {
         MainGameManager.instance.theRandomNumber = value;
+    }
+
+    [PunRPC]
+    public void GetRandomPosition (float x, float y, float z) {
+        Debug.Log("yes");
+        PhotonNetwork.Instantiate(ClientGameManager.instance.foodSpawn.name, new Vector3(x,y,z), Quaternion.identity);
+        Debug.Log("yesyes");
+    }
+
+    [PunRPC]
+    public void DestroyMe (int viewID) {
+        Destroy(PhotonView.Find(viewID).gameObject);
+    }
+
+    [PunRPC]
+    public void UpdateDiamonds(int spotID) {
+        playerDiamondCounts[spotID] += 1;
+    }
+
+    [PunRPC]
+    public void SpendDiamonds(int spotID, int diamondAmount) {
+        if (playerDiamondCounts[spotID] >= diamondAmount) {
+            playerDiamondCounts[spotID] -= diamondAmount;
+        } else { return; }
     }
 
 }
