@@ -131,19 +131,6 @@ public class ClientGameManager : MonoBehaviour {
     }
 
     public void UpgradeType(int upgradeType) {
-        switch (upgradeType) {
-            default:
-                return;
-            case 0:
-                MainGameManager.instance.speedUpgrade += 1;
-                break;
-            case 1:
-                MainGameManager.instance.reloadUpgrade += 1;
-                break;
-            case 2:
-                MainGameManager.instance.damageUpgrade += 1;
-                break;
-
-        }
+        ServerGameManager.instance.serverView.RPC("UpgradePlayer", RpcTarget.All, MainGameManager.instance.spotNumber, upgradeType);
     }
 }

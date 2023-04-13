@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour {
     public bool isHuman;
 
     [Header("Walking/Running")]
-    private float _speed = 8;
+    private float _speed = 8f;
     private Vector2 _movement;
     private Vector3 _updateMovementToVector3;
     private bool isWalking;
@@ -25,6 +25,14 @@ public class PlayerController : MonoBehaviour {
     public GameObject thrownObject;
     public Transform spawnObjectReference;
     private bool readyToDash;
+
+    [Header("Upgrades")]
+    public int speedUpgrade = 0;
+    public int reloadUpgrade = 0;
+    public int damageUpgrade = 0;
+    private float speedMultiplier = .8f;
+    private float reloadMultiplier;
+    private float damageMultiplier;
 
     private void Awake() {
         if (myView.IsMine) {
@@ -79,7 +87,7 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void MoveAround() { 
-        _myRigidbody.MovePosition(_myRigidbody.position + _updateMovementToVector3 * _speed * Time.fixedDeltaTime);
+        _myRigidbody.MovePosition(_myRigidbody.position + _updateMovementToVector3 * (_speed + (speedMultiplier * speedUpgrade)) * Time.fixedDeltaTime);
     }
 
     //inputs
@@ -106,6 +114,13 @@ public class PlayerController : MonoBehaviour {
             }
         }
     }
+    public void OnButton1 (InputAction.CallbackContext context) {
+        if (context.started) {
+            if (isHuman) {
+                ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 1, 0);
+            }
+        }
+    }
 
     private void OnCollisionEnter(Collision collision) {
         if (isHuman) {
@@ -118,5 +133,6 @@ public class PlayerController : MonoBehaviour {
             _myRigidbody.AddForce(Vector3.up * 100);
         }
     }
+
 
 }

@@ -15,6 +15,9 @@ public class ServerGameManager : MonoBehaviour {
 
     public GameObject[] playerReferences = new GameObject[15];
     public int[] playerDiamondCounts = new int[15];
+    public int[,] playerUpgrades = new int[15,3];
+
+    private int currentSpawnedDiamonds = 0;
 
     public GameState gameState;
     public enum GameState {
@@ -40,10 +43,6 @@ public class ServerGameManager : MonoBehaviour {
                 if (gameState != GameState.playing) {
                     gameState = GameState.playing;
                     GameObject tempObj = new GameObject();
-
-                    Debug.Log("Happens once");
-
-
                     ClientGameManager.instance.StartedPlaying();
                 }
                 break;
@@ -114,9 +113,9 @@ public class ServerGameManager : MonoBehaviour {
 
     [PunRPC]
     public void GetRandomPosition (float x, float y, float z) {
-        Debug.Log("yes");
+        if (currentSpawnedDiamonds >= 20) { return; }
         PhotonNetwork.Instantiate(ClientGameManager.instance.foodSpawn.name, new Vector3(x,y,z), Quaternion.identity);
-        Debug.Log("yesyes");
+        currentSpawnedDiamonds += 1;
     }
 
     [PunRPC]
@@ -125,15 +124,40 @@ public class ServerGameManager : MonoBehaviour {
     }
 
     [PunRPC]
-    public void UpdateDiamonds(int spotID) {
+    public void UpdateDiamonds (int spotID) {
         playerDiamondCounts[spotID] += 1;
     }
 
     [PunRPC]
-    public void SpendDiamonds(int spotID, int diamondAmount) {
+    public void SpendDiamonds (int spotID, int diamondAmount, int upgradeType) {
         if (playerDiamondCounts[spotID] >= diamondAmount) {
             playerDiamondCounts[spotID] -= diamondAmount;
-        } else { return; }
+
+            serverView.RPC("UpgradePlayer", RpcTarget.All, spotID, upgradeType);
+
+        } else {
+            Debug.Log("Not enough diamonds to upgrade!");
+            return; 
+        }
+    }
+
+    [PunRPC]
+    public void UpgradePlayer (int spotID, int upgradeSpot) {
+
+        playerUpgrades[spotID, upgradeSpot] += 1;
+
+        switch (upgradeSpot) {
+            case 0:
+                playerReferences[spotID].GetComponentInChildren<PlayerController>().speedUpgrade += 1;
+                break;
+            case 1:
+                playerReferences[spotID].GetComponentInChildren<PlayerController>().reloadUpgrade += 1;
+                break;
+            case 2:
+                playerReferences[spotID].GetComponentInChildren<PlayerController>().damageUpgrade += 1;
+                break;
+        }
+
     }
 
 }
