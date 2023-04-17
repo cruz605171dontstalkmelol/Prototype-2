@@ -29,8 +29,11 @@ public class ThrowObject : MonoBehaviour {
         _myCollider = GetComponent<MeshCollider>();
 
         if (GetComponent<PhotonView>().IsMine) {
+            int minValue = owner.GetComponentInChildren<PlayerController>().damageUpgrade * 5;
+            int maxValue = minValue+5;
+
             //get random value
-            int rand = Random.Range(0, possibleMeshes.Length);
+            int rand = Random.Range(minValue, maxValue);
             ServerGameManager.instance.serverView.RPC("SetRandomInt", RpcTarget.All, rand);
         }
 

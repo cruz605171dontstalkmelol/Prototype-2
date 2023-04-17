@@ -27,12 +27,16 @@ public class PlayerController : MonoBehaviour {
     public GameObject thrownObject;
     public Transform spawnObjectReference;
     private bool _readyToDash;
+    private bool _allowedToDash = true;
     private bool _canShoot = true;
     public float reloadInterval = 3;
     private int currentDamage = 1;
 
-    private int currentUpgrade = 0;
+    public int currentUpgrade = 0;
     public GameObject[] animalUpgrades;
+    public Sprite[] animalIcons;
+    public Image icon;
+    public Animator recharge;
 
 
     [Header("Upgrades")]
@@ -55,7 +59,7 @@ public class PlayerController : MonoBehaviour {
             playerInput = new PlayerInput();
         }
 
-        Invoke("AddNewPlayer", .1f);
+        Invoke("AddNewPlayer", .15f);
     }
 
     private void Start() {
@@ -89,8 +93,22 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Dash() {
+        recharge.Play("Charge_Start");
+        _myRigidbody.AddRelativeForce(Vector3.forward * 2500);
+        Invoke("StopDash", .1f);
+        Invoke("ResetDash", Mathf.Max(.1f, reloadInterval - (reloadInterval * ((_reloadMultiplier * reloadUpgrade) / 10))));
+        //_readyToDash = false;
+        //_myRigidbody.AddRelativeForce(Vector3.forward * 15500);
+        //_myRigidbody.MovePosition(_myRigidbody.position + Vector3.forward * 15500);
+    }
+
+    private void StopDash() {
         _readyToDash = false;
-        _myRigidbody.AddRelativeForce(Vector3.forward * 15500);
+    }
+
+    private void ResetDash() {
+        _allowedToDash = true;
+        recharge.Play("Charge_End");
     }
 
     private void RotateForward() {
@@ -115,8 +133,9 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    private void MoveAround() { 
+    private void MoveAround() {
         _myRigidbody.MovePosition(_myRigidbody.position + _updateMovementToVector3 * (_speed + (_speedMultiplier * speedUpgrade)) * Time.fixedDeltaTime);
+        //_myRigidbody.AddForce(_updateMovementToVector3 * (_speed + (_speedMultiplier * speedUpgrade)) * Time.fixedDeltaTime, ForceMode.Impulse);
     }
 
     //inputs
@@ -143,7 +162,10 @@ public class PlayerController : MonoBehaviour {
                     _canShoot = false;
                 }
                 else if (!isHuman) {
+                    if (!_allowedToDash) { return; }
+                    Dash();
                     _readyToDash = true;
+                    _allowedToDash = false;
                 }
             }
         }
@@ -160,8 +182,8 @@ public class PlayerController : MonoBehaviour {
                 if (ClientGameManager.instance.currentDiamonds >= 1) { SpawnAnnoucncement(0); }
                 ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 1, 0, ClientGameManager.instance.currentDiamonds - 1);
             } else {
-                if (ClientGameManager.instance.currentDiamonds >= 1) { SpawnAnnoucncement(3); }
-                ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 1, 0, ClientGameManager.instance.currentDiamonds - 1);
+                if (ClientGameManager.instance.currentDiamonds >= 5) { SpawnAnnoucncement(3); }
+                ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 5, 3, ClientGameManager.instance.currentDiamonds - 1);
             }
         }
     }
@@ -202,8 +224,10 @@ public class PlayerController : MonoBehaviour {
                 instAnnouncement.GetComponentInChildren<Text>().text = "+ DAMAGE UP";
                 break;
             case 3:
-                instAnnouncement.GetComponentInChildren<Text>().text = "+ UPGRADED";
-                currentUpgrade += 1;
+                if (currentUpgrade >= 3) { instAnnouncement.GetComponentInChildren<Text>().text = "+ PRESTIGE"; currentUpgrade = 0; } else {
+                    instAnnouncement.GetComponentInChildren<Text>().text = "+ UPGRADED";
+                    currentUpgrade += 1;
+                }
                 CheckAnimalUpgrade();
                 break;
         }
@@ -295,6 +319,8 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void CheckAnimalUpgrade() {
+        icon.sprite = animalIcons[currentUpgrade];
+
         ServerGameManager.instance.serverView.RPC("SetUpgradeAnimal", RpcTarget.All, MainGameManager.instance.spotNumber, currentUpgrade);
     }
 

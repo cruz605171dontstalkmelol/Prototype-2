@@ -201,6 +201,15 @@ public class ServerGameManager : MonoBehaviour {
             case 2:
                 playerReferences[spotID].GetComponentInChildren<PlayerController>().damageUpgrade += 1;
                 break;
+            case 3:
+                playerReferences[spotID].GetComponentInChildren<PlayerController>().speedUpgrade += 7;
+                playerReferences[spotID].GetComponentInChildren<PlayerController>().reloadUpgrade += 7;
+                if (playerReferences[spotID].GetComponentInChildren<PlayerController>().currentUpgrade == 3) {
+                    if (playerReferences[spotID].GetComponentInChildren<PlayerController>().damageUpgrade >= 3) { return; }
+                    playerReferences[spotID].GetComponentInChildren<PlayerController>().damageUpgrade += 1;
+                }
+
+                break;
         }
 
     }

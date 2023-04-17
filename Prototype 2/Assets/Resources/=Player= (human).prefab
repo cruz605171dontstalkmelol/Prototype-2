@@ -1299,7 +1299,12 @@ MonoBehaviour:
   thrownObject: {fileID: 6811358700365017150, guid: 38a6bdebfed77e24097965b69f348985, type: 3}
   spawnObjectReference: {fileID: 5011045889463191803}
   reloadInterval: 3
-  speedUpgrade: 0
+  currentUpgrade: 0
+  animalUpgrades: []
+  animalIcons: []
+  icon: {fileID: 0}
+  recharge: {fileID: 0}
+  speedUpgrade: 3
   reloadUpgrade: 0
   damageUpgrade: 0
   hotbar: {fileID: 1001179332754704654}
