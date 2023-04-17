@@ -1240,6 +1240,42 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 3c11095a-b872-42f5-934b-314213328ae7
     m_ActionName: Player/Button1[/Keyboard/numpad1,/Keyboard/1]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4536401591066028118}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnButton2
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: e837033f-9aee-4688-ac88-4fd14473144b
+    m_ActionName: Player/Button2[/Keyboard/numpad2,/Keyboard/2]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4536401591066028118}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnButton3
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: ba88107c-87df-45b4-9b3f-8ac29b65f362
+    m_ActionName: Player/Button3[/Keyboard/3,/Keyboard/numpad3]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f91c2960-f24f-44a3-b2ac-3878db614476
+    m_ActionName: Player/MousePosition[/Mouse/position]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -1262,9 +1298,11 @@ MonoBehaviour:
   isHuman: 1
   thrownObject: {fileID: 6811358700365017150, guid: 38a6bdebfed77e24097965b69f348985, type: 3}
   spawnObjectReference: {fileID: 5011045889463191803}
+  reloadInterval: 3
   speedUpgrade: 0
   reloadUpgrade: 0
   damageUpgrade: 0
+  canDamage: 1
 --- !u!114 &1261359673777696537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1352,6 +1390,9 @@ MonoBehaviour:
   - Type: 1
     SynchronizeType: 1
     Name: Body_Horizontal_f
+  - Type: 1
+    SynchronizeType: 0
+    Name: ReloadTime
   m_SynchronizeLayers:
   - SynchronizeType: 1
     LayerIndex: 0

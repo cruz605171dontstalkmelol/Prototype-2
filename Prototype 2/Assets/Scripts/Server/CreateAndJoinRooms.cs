@@ -10,10 +10,12 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks {
 
     public void CreateRoom() {
         PhotonNetwork.CreateRoom(codeInputField.text);
+        MainGameManager.instance.networkCode = codeInputField.text;
     }
 
     public void JoinRoom() {
         PhotonNetwork.JoinRoom(codeInputField.text);
+        MainGameManager.instance.networkCode = codeInputField.text;
     }
 
     public override void OnJoinedRoom() {

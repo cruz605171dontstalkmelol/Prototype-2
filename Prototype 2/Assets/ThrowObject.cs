@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 using Photon.Pun;
 
 public class ThrowObject : MonoBehaviour {
@@ -17,6 +19,9 @@ public class ThrowObject : MonoBehaviour {
 
     private bool hasThrown = false;
 
+    public bool canDamage = false;
+    public int amountOfDamage;
+
     private void Start() {
         _myRendererFilter = GetComponent<MeshFilter>();
         _myRenderer = GetComponent<MeshRenderer>();
@@ -34,7 +39,7 @@ public class ThrowObject : MonoBehaviour {
         _myCollider.sharedMesh = possibleMeshes[MainGameManager.instance.theRandomNumber];
 
         //throw
-        Invoke("Throw", .75f);
+        Invoke("Throw", owner.GetComponentInChildren<PlayerController>().reloadInterval * .75f);
         //Invoke("Throw", .235f);
     }
 
@@ -46,7 +51,7 @@ public class ThrowObject : MonoBehaviour {
     private void Throw() {
         _myRigidbody.useGravity = true;
         transform.parent = null;
-        _myRigidbody.AddForce(owner.forward * forcePower);
+        _myRigidbody.AddForce(owner.forward * (forcePower * Mathf.Max(owner.GetComponentInChildren<PlayerController>().speedUpgrade * .2f, 1)));
         Invoke("ToggleCollision", .15f);
         hasThrown = true;
     }
@@ -54,5 +59,15 @@ public class ThrowObject : MonoBehaviour {
     private void ToggleCollision() {
         _myCollider.enabled = true;
     }
+
+    private void OnCollisionEnter(Collision collision) {
+        StartCoroutine(TurnOffDamage());
+    }
+
+    private IEnumerator TurnOffDamage () {
+        yield return new WaitForSeconds(.1f);
+        canDamage = false;
+    }
+    
 
 }

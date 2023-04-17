@@ -80,6 +80,8 @@ MonoBehaviour:
   - {fileID: 2100000, guid: dc043a9656f81bc488510dcda2b382ab, type: 2}
   owner: {fileID: 0}
   forcePower: 1500
+  canDamage: 0
+  amountOfDamage: 0
 --- !u!23 &6811358700365017144
 MeshRenderer:
   m_ObjectHideFlags: 0

@@ -902,6 +902,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 3f162cdb-1176-4ba2-af98-3cc9eb100afe
     m_ActionName: Player/Throw[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 3c11095a-b872-42f5-934b-314213328ae7
+    m_ActionName: Player/Button1[/Keyboard/numpad1,/Keyboard/1]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: e837033f-9aee-4688-ac88-4fd14473144b
+    m_ActionName: Player/Button2[/Keyboard/numpad2,/Keyboard/2]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ba88107c-87df-45b4-9b3f-8ac29b65f362
+    m_ActionName: Player/Button3[/Keyboard/3,/Keyboard/numpad3]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f91c2960-f24f-44a3-b2ac-3878db614476
+    m_ActionName: Player/MousePosition[/Mouse/position]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -924,6 +940,11 @@ MonoBehaviour:
   isHuman: 0
   thrownObject: {fileID: 6811358700365017150, guid: 38a6bdebfed77e24097965b69f348985, type: 3}
   spawnObjectReference: {fileID: 6811358700365017145, guid: 38a6bdebfed77e24097965b69f348985, type: 3}
+  reloadInterval: 3
+  speedUpgrade: 0
+  reloadUpgrade: 0
+  damageUpgrade: 0
+  canDamage: 1
 --- !u!114 &7415627918558849132
 MonoBehaviour:
   m_ObjectHideFlags: 0

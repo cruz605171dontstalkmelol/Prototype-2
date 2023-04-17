@@ -16,22 +16,64 @@ public class ClientGameManager : MonoBehaviour {
     public Text readyText;
     public GameObject hostButton;
 
+    public Sprite[] icons;
+    public Image[] iconImages;
+
+    public Text lobbyTitle;
+
     [Header("Mode:Playing (setup)")]
     public GameObject humanPrefab;
     public GameObject animalPrefab;
     public Collider spawningBounds;
     //public GameObject[] playerReferences;
+    public MeshRenderer meshRenderer;
+    public Material[] textures;
 
     [Header("Mode:Playing")]
     private float spawnFoodTimer = 1;
     public GameObject foodSpawn;
     public GameObject uiScoreHolder;
 
+    public int currentDiamonds;
+    public Image scoreBar;
+
+    [Header("Mode:Win")]
+    public Text winnerName;
+    public Camera cutsceneCamera;
+    public Text winnerTag;
+    public Transform winnerPosition;
+    public Image backdrop;
+    public Sprite[] backdrops;
+
+    public GameObject hitEffect1;
+    public GameObject hitEffect2;
+    public GameObject hitEffect3;
+
+    [Header("Announcements")]
+    public Transform announcementsHolder;
+    public GameObject announcements;
+
     //rpc buffer delay
     private void Start() {
         HostOrPlayer();
 
+        UpdateLobbyTitle();
+
+        if (PhotonNetwork.IsMasterClient) {
+            int textureID = Random.Range(0, textures.Length);
+
+            ServerGameManager.instance.serverView.RPC("TextureGround", RpcTarget.AllBuffered, textureID);
+        }
+
         Invoke("SendPlayerName", .1f);
+    }
+
+    public void ChangeGroundTexture(int textureID) {
+        meshRenderer.material = textures[textureID];
+    }
+
+    private void UpdateLobbyTitle () {
+        lobbyTitle.text = "Lobby [" + MainGameManager.instance.networkCode + "]";
     }
 
     //change button depending on host or player
@@ -54,6 +96,12 @@ public class ClientGameManager : MonoBehaviour {
         usernameSpots[updateSpotNumber].gameObject.SetActive(true);
     }
 
+    public void UpdateIcons(int updateSpotNumber, Image updateSpotIcon) {
+        //update username
+        iconImages[updateSpotNumber].sprite = icons[2];
+        iconImages[updateSpotNumber].gameObject.SetActive(true);
+    }
+
     //update the ready text
     public void UpdateReadyList (int totalReadyCount, int totalPlayerCount) {
         readyText.text = "Ready (" + totalReadyCount + "/" + totalPlayerCount + ")";
@@ -70,14 +118,14 @@ public class ClientGameManager : MonoBehaviour {
     public void UpdateTeam(int teamID, int spotNumber) {
         //teamID 0 = human; 1 = animal
         switch (teamID) {
-            case 0:
-                usernameSpots[spotNumber].color = teamHumanColor;
-                break;
             case 1:
-                usernameSpots[spotNumber].color = teamAnimalColor;
+                ServerGameManager.instance.playerIcons[spotNumber].sprite = icons[0];
+                break;
+            case 2:
+                ServerGameManager.instance.playerIcons[spotNumber].sprite = icons[1];
                 break;
             default:
-                usernameSpots[spotNumber].color = teamAnimalColor;
+                ServerGameManager.instance.playerIcons[spotNumber].sprite = icons[1];
             break;
         }
     }
@@ -116,8 +164,10 @@ public class ClientGameManager : MonoBehaviour {
 
     public void StartedPlaying() {
         //get random position in our bounds and spawn player in there
-        if (MainGameManager.instance.teamID == 0) { PhotonNetwork.Instantiate(humanPrefab.name, SpawnPosition(spawningBounds.bounds), Quaternion.identity); }
-        else { PhotonNetwork.Instantiate(animalPrefab.name, SpawnPosition(spawningBounds.bounds), Quaternion.identity); }
+        if (MainGameManager.instance.teamID == 0) { MainGameManager.instance.teamID = Random.Range(1, 3); }
+
+        if (MainGameManager.instance.teamID == 1) { PhotonNetwork.Instantiate(humanPrefab.name, SpawnPosition(spawningBounds.bounds), Quaternion.identity); }
+        else if (MainGameManager.instance.teamID == 2) { PhotonNetwork.Instantiate(animalPrefab.name, SpawnPosition(spawningBounds.bounds), Quaternion.identity); }
     }
 
     //get a random position
@@ -133,4 +183,88 @@ public class ClientGameManager : MonoBehaviour {
     public void UpgradeType(int upgradeType) {
         ServerGameManager.instance.serverView.RPC("UpgradePlayer", RpcTarget.All, MainGameManager.instance.spotNumber, upgradeType);
     }
+
+    public void CollectedDiamond() {
+        currentDiamonds += 1;
+        scoreBar.fillAmount += 0.055f;
+
+        if (currentDiamonds >= 18) {
+            //win the game
+            ServerGameManager.instance.serverView.RPC("WonGame", RpcTarget.All, MainGameManager.instance.spotNumber, MainGameManager.instance.username);
+        }
+    }
+
+
+    public void LoseDiamond(int amountLost) {
+        for (int i = 0; i < amountLost; i++) {
+            currentDiamonds -= 1;
+            scoreBar.fillAmount -= 0.055f;
+        }
+    }
+
+    public void EndCutscene(int winnerViewID) {
+
+        //stall time for 3 seconds saying that its finished
+        //minecraft background and the winner in the middle
+        //username over them
+        //winner
+        //camera back and fourth side to side
+
+        PhotonView.Find(winnerViewID).GetComponentInChildren<PlayerController>().gameObject.transform.position = winnerPosition.position;
+
+        if (PhotonNetwork.IsMasterClient) {
+            string animationName;
+
+            switch (Random.Range(0,8)) {
+                case 0:
+                    animationName = "Idle_SexyDance";
+                    break;
+                case 1:
+                    animationName = "Idle_LeaningAgaintWall";
+                    break;
+                case 2:
+                    animationName = "Idle_HandOnHips";
+                    break;
+                case 3:
+                    animationName = "Idle_SittingOnGround";
+                    break;
+                case 4:
+                    animationName = "Idle_Smoking";
+                    break;
+                case 5:
+                    animationName = "Idle_WipeMouth";
+                    break;
+                case 6:
+                    animationName = "Idle_CheckWatch";
+                    break;
+                case 7:
+                    animationName = "Idle_CrossedArms";
+                    break;
+                default:
+                    animationName = "Idle_SexyDance";
+                    break;
+            }
+
+            int backdropID = Random.Range(0, backdrops.Length);
+
+            ServerGameManager.instance.serverView.RPC("PlayAnimationEnd", RpcTarget.All, winnerViewID, animationName, backdropID);
+        }
+
+        StartCoroutine(FinishAnnoucements());
+
+    }
+
+    public IEnumerator FinishAnnoucements() {
+        uiScoreHolder.SetActive(false);
+        yield return new WaitForSeconds(3);
+        cutsceneCamera.gameObject.SetActive(true);
+        cutsceneCamera.depth = 0;
+
+        winnerTag.text = winnerName.text;
+    }
+
+    public void DisconnectPlayer () {
+        PhotonNetwork.LeaveRoom();
+    }
+
 }

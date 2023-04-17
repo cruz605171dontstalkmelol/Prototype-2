@@ -7,6 +7,7 @@ public class MainGameManager : MonoBehaviour {
     private void Awake() { if (instance == null) { instance = this; DontDestroyOnLoad(this.gameObject); } else { Destroy(this.gameObject); } }
 
     public string username;
+    public string networkCode;
     public int spotNumber;
     public int teamID;
     public bool hasReadiedUp;

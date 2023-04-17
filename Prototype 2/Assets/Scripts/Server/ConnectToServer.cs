@@ -6,7 +6,12 @@ public class ConnectToServer : MonoBehaviourPunCallbacks {
     public GameObject toggleServerObjects;
 
     private void Start() {
-        PhotonNetwork.ConnectUsingSettings();
+        if (!PhotonNetwork.IsConnected) {
+
+            PhotonNetwork.ConnectUsingSettings();
+
+        }
+
     }
 
     public override void OnConnectedToMaster() {
