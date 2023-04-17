@@ -238,4 +238,16 @@ public class ServerGameManager : MonoBehaviour {
         playerReferences[spotID].GetComponentInChildren<PlayerController>().canDamage = true;
     }
 
+    [PunRPC]
+    public void SetUpgradeAnimal (int spotID, int currentUpgrade) {
+        playerUpgrades[spotID, 0] = currentUpgrade;
+        PlayerController animalContrller = playerReferences[spotID].GetComponentInChildren<PlayerController>();
+        for (int i = 0; i < animalContrller.animalUpgrades.Length; i++) {
+            animalContrller.animalUpgrades[i].SetActive(false);
+            if (currentUpgrade == i) {
+                animalContrller.animalUpgrades[i].SetActive(true);
+            }
+        }
+    }
+
 }

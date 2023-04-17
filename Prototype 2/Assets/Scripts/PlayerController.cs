@@ -31,6 +31,9 @@ public class PlayerController : MonoBehaviour {
     public float reloadInterval = 3;
     private int currentDamage = 1;
 
+    private int currentUpgrade = 0;
+    public GameObject[] animalUpgrades;
+
 
     [Header("Upgrades")]
     public int speedUpgrade = 0;
@@ -39,6 +42,9 @@ public class PlayerController : MonoBehaviour {
     private float _speedMultiplier = .8f;
     private float _reloadMultiplier = .9f;
     private float _damageMultiplier;
+
+    [Header("Extra")]
+    public GameObject hotbar;
 
     public bool canDamage = true;
 
@@ -50,6 +56,12 @@ public class PlayerController : MonoBehaviour {
         }
 
         Invoke("AddNewPlayer", .1f);
+    }
+
+    private void Start() {
+        if (myView.IsMine) {
+            hotbar.SetActive(true);
+        }
     }
     private void AddNewPlayer () {
         if (!myView.IsMine) { return; }
@@ -147,6 +159,9 @@ public class PlayerController : MonoBehaviour {
             if (isHuman) {
                 if (ClientGameManager.instance.currentDiamonds >= 1) { SpawnAnnoucncement(0); }
                 ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 1, 0, ClientGameManager.instance.currentDiamonds - 1);
+            } else {
+                if (ClientGameManager.instance.currentDiamonds >= 1) { SpawnAnnoucncement(3); }
+                ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 1, 0, ClientGameManager.instance.currentDiamonds - 1);
             }
         }
     }
@@ -185,6 +200,11 @@ public class PlayerController : MonoBehaviour {
                 break;
             case 2:
                 instAnnouncement.GetComponentInChildren<Text>().text = "+ DAMAGE UP";
+                break;
+            case 3:
+                instAnnouncement.GetComponentInChildren<Text>().text = "+ UPGRADED";
+                currentUpgrade += 1;
+                CheckAnimalUpgrade();
                 break;
         }
 
@@ -272,6 +292,10 @@ public class PlayerController : MonoBehaviour {
     public void SendLoseDiamondsToClient (int amountLost) {
         if (!myView.IsMine) { return; }
         ClientGameManager.instance.LoseDiamond(amountLost);
+    }
+
+    private void CheckAnimalUpgrade() {
+        ServerGameManager.instance.serverView.RPC("SetUpgradeAnimal", RpcTarget.All, MainGameManager.instance.spotNumber, currentUpgrade);
     }
 
 }

@@ -340,7 +340,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &245606576002575290
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1302,6 +1302,7 @@ MonoBehaviour:
   speedUpgrade: 0
   reloadUpgrade: 0
   damageUpgrade: 0
+  hotbar: {fileID: 1001179332754704654}
   canDamage: 1
 --- !u!114 &1261359673777696537
 MonoBehaviour:
