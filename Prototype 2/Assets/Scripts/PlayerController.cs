@@ -200,7 +200,7 @@ public class PlayerController : MonoBehaviour {
     public void OnButton3(InputAction.CallbackContext context) {
         if (context.started) {
             if (isHuman) {
-                if (ClientGameManager.instance.currentDiamonds >= 3) { SpawnAnnoucncement(2); }
+                if (ClientGameManager.instance.currentDiamonds >= 3 && currentDamage !>= 3) { SpawnAnnoucncement(2); }
                 ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 3, 2, ClientGameManager.instance.currentDiamonds - 3);
                 currentDamage = Mathf.Min(currentDamage * damageUpgrade, 3);
             }

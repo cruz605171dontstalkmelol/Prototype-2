@@ -188,9 +188,9 @@ public class ServerGameManager : MonoBehaviour {
 
     [PunRPC]
     public void UpgradePlayer (int spotID, int upgradeSpot) {
-
-        playerUpgrades[spotID, upgradeSpot] += 1;
-
+        if (upgradeSpot > 3) {
+            playerUpgrades[spotID, upgradeSpot] += 1;
+        }
         switch (upgradeSpot) {
             case 0:
                 playerReferences[spotID].GetComponentInChildren<PlayerController>().speedUpgrade += 1;
