@@ -159,10 +159,12 @@ public class PlayerController : MonoBehaviour {
                     ServerGameManager.instance.serverView.RPC("SetOwnerToFood", RpcTarget.All, instFood.GetComponent<PhotonView>().ViewID, MainGameManager.instance.spotNumber);
                     ServerGameManager.instance.serverView.RPC("PlayAnimation", RpcTarget.All, MainGameManager.instance.spotNumber, "SpawnFood_Throw", 1, reloadInterval);
                     ServerGameManager.instance.serverView.RPC("SetDamageAmount", RpcTarget.All, instFood.GetComponent<PhotonView>().ViewID, currentDamage);
+                    ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 8);
                     _canShoot = false;
                 }
                 else if (!isHuman) {
                     if (!_allowedToDash) { return; }
+                    ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 2);
                     Dash();
                     _readyToDash = true;
                     _allowedToDash = false;
@@ -179,10 +181,10 @@ public class PlayerController : MonoBehaviour {
     public void OnButton1 (InputAction.CallbackContext context) {
         if (context.started) {
             if (isHuman) {
-                if (ClientGameManager.instance.currentDiamonds >= 1) { SpawnAnnoucncement(0); }
+                if (ClientGameManager.instance.currentDiamonds >= 1) { SpawnAnnoucncement(0); ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 4); }
                 ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 1, 0, ClientGameManager.instance.currentDiamonds - 1);
             } else {
-                if (ClientGameManager.instance.currentDiamonds >= 5) { SpawnAnnoucncement(3); }
+                if (ClientGameManager.instance.currentDiamonds >= 5) { SpawnAnnoucncement(3); ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 4); }
                 ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 5, 3, ClientGameManager.instance.currentDiamonds - 1);
             }
         }
@@ -191,7 +193,7 @@ public class PlayerController : MonoBehaviour {
     public void OnButton2(InputAction.CallbackContext context) {
         if (context.started) {
             if (isHuman) {
-                if (ClientGameManager.instance.currentDiamonds >= 2) { SpawnAnnoucncement(1); reloadInterval = reloadInterval - (reloadInterval * ((_reloadMultiplier * reloadUpgrade) / 10)); }
+                if (ClientGameManager.instance.currentDiamonds >= 2) { ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 4); SpawnAnnoucncement(1); reloadInterval = reloadInterval - (reloadInterval * ((_reloadMultiplier * reloadUpgrade) / 10)); }
                 ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 2, 1, ClientGameManager.instance.currentDiamonds - 2);
             }
         }
@@ -200,9 +202,11 @@ public class PlayerController : MonoBehaviour {
     public void OnButton3(InputAction.CallbackContext context) {
         if (context.started) {
             if (isHuman) {
-                if (ClientGameManager.instance.currentDiamonds >= 3 && currentDamage !>= 3) { SpawnAnnoucncement(2); }
-                ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 3, 2, ClientGameManager.instance.currentDiamonds - 3);
-                currentDamage = Mathf.Min(currentDamage * damageUpgrade, 3);
+                if (currentDamage < 3) {
+                    if (ClientGameManager.instance.currentDiamonds >= 3) { SpawnAnnoucncement(2); ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 4); }
+                    ServerGameManager.instance.serverView.RPC("SpendDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, 3, 2, ClientGameManager.instance.currentDiamonds - 3);
+                    currentDamage = Mathf.Min(currentDamage * damageUpgrade, 3);
+                }
             }
         }
     }
@@ -241,11 +245,13 @@ public class PlayerController : MonoBehaviour {
 
         else {
             if (isHuman) {
-                if (collision.gameObject.tag == "animal" && canDamage) {
+                if ((collision.gameObject.tag == "animal" || collision.gameObject.tag == "food") && canDamage) {
 
-                    Debug.Log("Animal doing damage");
+                    if (ClientGameManager.instance.currentDiamonds <= 0) { return; }
 
+                    ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 1);
                     ServerGameManager.instance.playerDiamondCounts[MainGameManager.instance.spotNumber] -= collision.gameObject.GetComponent<PlayerController>().currentDamage;
+                    ServerGameManager.instance.playerDiamondCounts[MainGameManager.instance.spotNumber] = Mathf.Max(ServerGameManager.instance.playerDiamondCounts[MainGameManager.instance.spotNumber], 0);
                     ServerGameManager.instance.serverView.RPC("GetHit", RpcTarget.All, MainGameManager.instance.spotNumber, ServerGameManager.instance.playerDiamondCounts[MainGameManager.instance.spotNumber]);
                     SendLoseDiamondsToClient(collision.gameObject.GetComponent<PlayerController>().currentDamage);
 
@@ -275,9 +281,12 @@ public class PlayerController : MonoBehaviour {
                 }
             }
             else {
-                if (collision.gameObject.tag == "food") {
+                if ((collision.gameObject.tag == "food" || collision.gameObject.tag == "animal") && canDamage) {
+
+                    if (ClientGameManager.instance.currentDiamonds <= 0) { return; } 
 
                     ServerGameManager.instance.playerDiamondCounts[MainGameManager.instance.spotNumber] -= collision.gameObject.GetComponent<ThrowObject>().amountOfDamage;
+                    ServerGameManager.instance.playerDiamondCounts[MainGameManager.instance.spotNumber] = Mathf.Max(ServerGameManager.instance.playerDiamondCounts[MainGameManager.instance.spotNumber], 0);
                     ServerGameManager.instance.serverView.RPC("GetHit", RpcTarget.All, MainGameManager.instance.spotNumber, ServerGameManager.instance.playerDiamondCounts[MainGameManager.instance.spotNumber]);
                     SendLoseDiamondsToClient(collision.gameObject.GetComponent<ThrowObject>().amountOfDamage);
 

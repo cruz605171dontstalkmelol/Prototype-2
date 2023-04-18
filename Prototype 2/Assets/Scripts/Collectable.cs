@@ -10,6 +10,7 @@ public class Collectable : MonoBehaviour {
             if (other.gameObject.GetComponentInParent<PhotonView>().IsMine) {
 
                 Destroy(PhotonNetwork.Instantiate(particleEffect.name, transform.position, Quaternion.identity), 1f);
+                ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 5);
 
                 ClientGameManager.instance.CollectedDiamond();
                 ServerGameManager.instance.serverView.RPC("UpdateDiamonds", RpcTarget.All, MainGameManager.instance.spotNumber, ClientGameManager.instance.currentDiamonds);

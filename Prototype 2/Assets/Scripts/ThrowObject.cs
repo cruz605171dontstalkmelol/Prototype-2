@@ -55,6 +55,7 @@ public class ThrowObject : MonoBehaviour {
         _myRigidbody.useGravity = true;
         transform.parent = null;
         _myRigidbody.AddForce(owner.forward * (forcePower * Mathf.Max(owner.GetComponentInChildren<PlayerController>().speedUpgrade * .2f, 1)));
+        ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 7);
         Invoke("ToggleCollision", .15f);
         hasThrown = true;
     }

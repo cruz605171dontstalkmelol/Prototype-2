@@ -215,6 +215,17 @@ public class ServerGameManager : MonoBehaviour {
     }
 
     [PunRPC]
+    public void SongID (int songID) {
+        ClientGameManager.instance.PlaySong(songID);
+    }
+
+    [PunRPC]
+    public void PlaySoundEffect (int soundID) {
+        SoundManager.instance.PlaySound(soundID);
+    }
+
+
+    [PunRPC]
     public void WonGame(int spotID, string username) {
         ClientGameManager.instance.winnerName.text = username;
         ClientGameManager.instance.winnerName.gameObject.SetActive(true);

@@ -9,11 +9,13 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks {
     public InputField nameInputField;
 
     public void CreateRoom() {
+        SoundManager.instance.PlaySound(0);
         PhotonNetwork.CreateRoom(codeInputField.text);
         MainGameManager.instance.networkCode = codeInputField.text;
     }
 
     public void JoinRoom() {
+        SoundManager.instance.PlaySound(0);
         PhotonNetwork.JoinRoom(codeInputField.text);
         MainGameManager.instance.networkCode = codeInputField.text;
     }

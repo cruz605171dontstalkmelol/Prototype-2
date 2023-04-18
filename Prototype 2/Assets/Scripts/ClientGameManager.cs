@@ -53,6 +53,12 @@ public class ClientGameManager : MonoBehaviour {
     public Transform announcementsHolder;
     public GameObject announcements;
 
+    [Header("Extra")]
+    public AudioClip[] songs;
+    public AudioSource audioSource;
+    public int musicID;
+    public GameObject Winning;
+
     //rpc buffer delay
     private void Start() {
         HostOrPlayer();
@@ -109,6 +115,7 @@ public class ClientGameManager : MonoBehaviour {
 
     //send change team data to rpc
     public void SendChangeTeam (int teamID) {
+        SoundManager.instance.PlaySound(0);
         if (MainGameManager.instance.hasReadiedUp) { return; }
         MainGameManager.instance.teamID = teamID;
         ServerGameManager.instance.serverView.RPC("ChangePlayerTeam", RpcTarget.AllBuffered, teamID, MainGameManager.instance.spotNumber);
@@ -132,6 +139,7 @@ public class ClientGameManager : MonoBehaviour {
 
     //send ready up data to rpc
     public void SendReadyUp() {
+        SoundManager.instance.PlaySound(0);
         if (MainGameManager.instance.hasReadiedUp) { return; }
         ServerGameManager.instance.serverView.RPC("ReadyPlayerUp", RpcTarget.AllBuffered);
         MainGameManager.instance.hasReadiedUp = true;
@@ -139,7 +147,10 @@ public class ClientGameManager : MonoBehaviour {
 
     //send start game data to rpc
     public void SendStartGame() {
-        ServerGameManager.instance.serverView.RPC("StartGame", RpcTarget.AllBuffered);
+        SoundManager.instance.PlaySound(0);
+        if (PhotonNetwork.IsMasterClient) {
+            ServerGameManager.instance.serverView.RPC("StartGame", RpcTarget.AllBuffered);
+        }
     }
 
     //start the game
@@ -148,11 +159,19 @@ public class ClientGameManager : MonoBehaviour {
         uiScoreHolder.SetActive(true);
         ServerGameManager.instance.serverView.RPC("ChangeGameState", RpcTarget.AllBuffered, 1);
         Invoke("SpawnFood", spawnFoodTimer);
+
+        int randSongID = Random.Range(0, songs.Length);
+        ServerGameManager.instance.serverView.RPC("SongID", RpcTarget.All, randSongID);
+    }
+
+    public void PlaySong(int songID) {
+        audioSource.PlayOneShot(songs[songID]);
     }
 
     //spawn food
     public void SpawnFood () {
         if (PhotonNetwork.IsMasterClient) {
+            ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 6);
             Bounds bounds = spawningBounds.bounds;
             float x = Random.Range(bounds.min.x, bounds.max.x);
             float y = 1;
@@ -247,6 +266,8 @@ public class ClientGameManager : MonoBehaviour {
 
             int backdropID = Random.Range(0, backdrops.Length);
 
+            ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 3);
+            ServerGameManager.instance.serverView.RPC("PlaySoundEffect", RpcTarget.All, 3);
             ServerGameManager.instance.serverView.RPC("PlayAnimationEnd", RpcTarget.All, winnerViewID, animationName, backdropID);
         }
 
@@ -256,7 +277,9 @@ public class ClientGameManager : MonoBehaviour {
 
     public IEnumerator FinishAnnoucements() {
         uiScoreHolder.SetActive(false);
+        Winning.SetActive(true);
         yield return new WaitForSeconds(3);
+        Winning.SetActive(false);
         cutsceneCamera.gameObject.SetActive(true);
         cutsceneCamera.depth = 0;
 
@@ -264,6 +287,7 @@ public class ClientGameManager : MonoBehaviour {
     }
 
     public void DisconnectPlayer () {
+        SoundManager.instance.PlaySound(0);
         PhotonNetwork.LeaveRoom();
     }
 
