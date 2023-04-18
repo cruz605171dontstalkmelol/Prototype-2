@@ -7,8 +7,6 @@ TagManager:
   - animal
   - food
   - human
-  - Dog
-  - Frizbee
   layers:
   - Default
   - TransparentFX
